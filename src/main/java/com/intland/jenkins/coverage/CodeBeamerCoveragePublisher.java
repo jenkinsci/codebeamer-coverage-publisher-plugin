@@ -293,7 +293,7 @@ public class CodeBeamerCoveragePublisher extends Notifier {
 		private boolean checkTrackerType(String uri, String userName, String password, Integer trackerId,
 				int validTrackerTypeId) throws IOException {
 			CodebeamerApiClient apiClient = new CodebeamerApiClient(uri, userName, password);
-			TrackerDto trackerDto = apiClient.getTrackerType(trackerId);
+			TrackerDto trackerDto = apiClient.getTracker(trackerId);
 			boolean result = false;
 
 			if (trackerDto != null) {

@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -32,9 +33,14 @@ import com.intland.jenkins.api.dto.TestRunDto;
 import com.intland.jenkins.api.dto.TrackerDto;
 import com.intland.jenkins.api.dto.TrackerItemDto;
 import com.intland.jenkins.api.dto.TrackerSchemaDto;
-import com.intland.jenkins.api.dto.UserDto;
 import com.intland.jenkins.coverage.ExecutionContext;
 
+/**
+ * A service class that implement the data transfer between the codeBeamer and
+ * the jenkins plugin
+ *
+ * @author abanfi
+ */
 public class CodebeamerApiClient {
 
 	private final int HTTP_TIMEOUT = 300000;
@@ -47,7 +53,11 @@ public class CodebeamerApiClient {
 		this.baseUrl = uri;
 
 		this.objectMapper = new ObjectMapper();
-		CredentialsProvider provider = this.getCredentialsProvider(username, password);
+
+		// initialize rest client
+		CredentialsProvider provider = new BasicCredentialsProvider();
+		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+		provider.setCredentials(AuthScope.ANY, credentials);
 		this.client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
 		this.requestConfig = RequestConfig.custom().setConnectionRequestTimeout(this.HTTP_TIMEOUT)
 				.setConnectTimeout(this.HTTP_TIMEOUT).setSocketTimeout(this.HTTP_TIMEOUT).build();
@@ -66,24 +76,43 @@ public class CodebeamerApiClient {
 	 * @return the found or the newly created tracker item
 	 * @throws IOException
 	 */
-	public TrackerItemDto findOrCreateTrackerItem(ExecutionContext context, Integer trackerId, String name,
+	public TrackerItemDto findOrCreateTestSet(ExecutionContext context, Integer trackerId, String name,
 			String description) throws IOException {
+
 		String urlParamName = this.encodeParam(name);
-		String content = this
-				.get(String.format(this.baseUrl + "/rest/tracker/%s/items/or/name=%s/page/1", trackerId, urlParamName));
-		PagedTrackerItemsDto pagedTrackerItemsDto = this.objectMapper.readValue(content, PagedTrackerItemsDto.class);
+		String requestUrl = String.format(this.baseUrl + "/rest/tracker/%s/items/or/name=%s/page/1", trackerId,
+				urlParamName);
+		context.logFormat("Call URL <%s> for tracker item.", requestUrl);
+
+		PagedTrackerItemsDto pagedTrackerItemsDto = this.get(requestUrl, PagedTrackerItemsDto.class);
 
 		if (pagedTrackerItemsDto.getTotal() > 0) {
-			return pagedTrackerItemsDto.getItems()[0];
+			TrackerItemDto testSetDto = pagedTrackerItemsDto.getItems()[0];
+			context.logFormat("%d Tracker item found, returns with the first: <%s>", pagedTrackerItemsDto.getTotal(),
+					testSetDto);
+			return testSetDto;
 		} else {
-			TestRunDto testConfig = new TestRunDto();
-			testConfig.setName(name);
-			testConfig.setTracker("/tracker/" + trackerId);
-			testConfig.setDescription(description);
-			return this.postTrackerItem(context, testConfig);
+
+			context.log("There is no master test set yet.");
+			TestRunDto testSetDto = new TestRunDto();
+			testSetDto.setName(name);
+			testSetDto.setTracker("/tracker/" + trackerId);
+			testSetDto.setDescription(description);
+
+			TrackerItemDto trackerItem = this.postTrackerItem(context, testSetDto);
+			context.logFormat("New test set succesfully created: <%s>", testSetDto);
+			return trackerItem;
 		}
 	}
 
+	/**
+	 * Encode URL parameters
+	 *
+	 * @param param
+	 *            the parameter to encode
+	 *
+	 * @return the encoded parameter
+	 */
 	public String encodeParam(String param) {
 		try {
 			String result = URLEncoder.encode(param, "UTF-8");
@@ -93,6 +122,14 @@ public class CodebeamerApiClient {
 		}
 	}
 
+	/**
+	 * Post the specified tracker item to the codeBeamer
+	 *
+	 * @param context
+	 * @param testRunDto
+	 * @return
+	 * @throws IOException
+	 */
 	public TrackerItemDto postTrackerItem(ExecutionContext context, TestRunDto testRunDto) throws IOException {
 		String content = this.objectMapper.writeValueAsString(testRunDto);
 		return this.post(context, content);
@@ -104,90 +141,95 @@ public class CodebeamerApiClient {
 	 * @param trackerId
 	 *            the tracker's id
 	 * @return all of the tracker item in the tracker
+	 *
 	 * @throws IOException
 	 */
-	public List<TrackerItemDto> getTrackerItemList(ExecutionContext context) throws IOException {
+	public List<TrackerItemDto> getTestCaseList(ExecutionContext context) throws IOException {
 
 		String url = "%s/rest/tracker/%s/items/page/%s?pagesize=500";
 
 		List<TrackerItemDto> items = new ArrayList<>();
 		int total = 0;
-		int page = 1;
+		int pageCount = 1;
 		do {
-			context.logFormat("Loading Test case page %d", page);
+			String pageUrl = String.format(url, this.baseUrl, context.getTestCaseTrackerId(), pageCount);
+			context.logFormat("Loading Test Case Page: <%s>", pageUrl);
+
 			// get a page from codebeamer
-			String json = this.get(String.format(url, this.baseUrl, context.getTestCaseTrackerId(), page));
-			PagedTrackerItemsDto pagedTrackerItemsDto = this.objectMapper.readValue(json, PagedTrackerItemsDto.class);
+			PagedTrackerItemsDto pagedTrackerItemsDto = this.get(pageUrl, PagedTrackerItemsDto.class);
 			total = pagedTrackerItemsDto.getTotal();
 			items.addAll(Arrays.asList(pagedTrackerItemsDto.getItems()));
 
-			context.logFormat("Page %d loaded, all items: %d (all items count: %d)", page, items.size(), total);
-			page++;
+			context.logFormat("Page %d loaded, all items: %d (all items count: %d)", pageCount, items.size(), total);
+			pageCount++;
 		} while (items.size() < total);
 
 		return items;
 	}
 
-	@Deprecated
-	public TrackerItemDto[] getTrackerItems(Integer trackerId) throws IOException {
-		String url = String.format("%s/rest/tracker/%s/items/page/1?pagesize=500", this.baseUrl, trackerId);
-		String json = this.get(url);
-		PagedTrackerItemsDto pagedTrackerItemsDto = this.objectMapper.readValue(json, PagedTrackerItemsDto.class);
-
-		int numberOfRequests = (pagedTrackerItemsDto.getTotal() / 500) + 1;
-		List<TrackerItemDto> items = Arrays.asList(pagedTrackerItemsDto.getItems());
-		for (int i = 2; i < numberOfRequests; i++) {
-			url = String.format("%s/rest/tracker/%s/items/page/%s?pagesize=500", this.baseUrl, trackerId,
-					numberOfRequests);
-			json = this.get(url);
-			pagedTrackerItemsDto = this.objectMapper.readValue(json, PagedTrackerItemsDto.class);
-			items.addAll(Arrays.asList(pagedTrackerItemsDto.getItems()));
-		}
-
-		return items.toArray(new TrackerItemDto[items.size()]);
-	}
-
+	/**
+	 * Checks specified test case tracker is support the given test case type or
+	 * not
+	 *
+	 * @param testCaseTrackerId
+	 * @param testCaseType
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean isTestCaseTypeSupported(Integer testCaseTrackerId, String testCaseType) throws IOException {
 		String url = String.format("%s/rest/tracker/%s/schema", this.baseUrl, testCaseTrackerId);
-		String json = this.get(url);
-		TrackerSchemaDto trackerSchemaDto = this.objectMapper.readValue(json, TrackerSchemaDto.class);
+		TrackerSchemaDto trackerSchemaDto = this.get(url, TrackerSchemaDto.class);
 		return trackerSchemaDto.doesTypeContain(testCaseType);
 	}
 
-	public TrackerItemDto updateTrackerItemStatus(ExecutionContext context, Integer id, String status)
-			throws IOException {
+	/**
+	 * Updates the specified test case status
+	 *
+	 * @param context
+	 *            the execution context
+	 * @param id
+	 *            the test case id to update
+	 * @param status
+	 *            the new status
+	 * @return the updated value
+	 * @throws IOException
+	 */
+	public TrackerItemDto updateTestCaseStatus(ExecutionContext context, Integer id, String status) throws IOException {
 		TestCaseDto testCaseDto = new TestCaseDto(id, status);
 		String content = this.objectMapper.writeValueAsString(testCaseDto);
 		return this.put(context, content);
 	}
 
+	/**
+	 * Fetch a tracker item from the codeBeamer by the specified id
+	 *
+	 * @param itemId
+	 * @return
+	 * @throws IOException
+	 */
 	public TrackerItemDto getTrackerItem(Integer itemId) throws IOException {
-		String value = this.get(this.baseUrl + "/rest/item/" + itemId);
-		return value != null ? this.objectMapper.readValue(value, TrackerItemDto.class) : null;
+		return this.get(String.format("%s/rest/item/%s", this.baseUrl, itemId), TrackerItemDto.class);
 	}
 
-	public TrackerDto getTrackerType(Integer trackerId) throws IOException {
-		String value = this.get(this.baseUrl + "/rest/tracker/" + trackerId);
-		return value != null ? this.objectMapper.readValue(value, TrackerDto.class) : null;
+	/**
+	 * Fetch the tracker for the specified tracker id
+	 *
+	 * @param trackerId
+	 * @return
+	 * @throws IOException
+	 */
+	public TrackerDto getTracker(Integer trackerId) throws IOException {
+		return this.get(String.format("%s/rest/tracker/%s", this.baseUrl, trackerId), TrackerDto.class);
 	}
 
-	public String getUserId(String author) throws IOException {
-		String authorNoSpace = author.replaceAll(" ", "");
-		String tmpUrl = String.format("%s/rest/user/%s", this.baseUrl, authorNoSpace);
-
-		String httpResult = this.get(tmpUrl);
-		String result = null;
-
-		if (httpResult != null) { // 20X success
-			UserDto userDto = this.objectMapper.readValue(httpResult, UserDto.class);
-			String uri = userDto.getUri();
-			result = uri.substring(uri.lastIndexOf("/") + 1);
-		}
-
-		return result;
-	}
-
-	private TrackerItemDto post(ExecutionContext context, String content) throws IOException {
+	/**
+	 * Posts a tracker item
+	 *
+	 * @param context
+	 * @param content
+	 * @return
+	 */
+	private TrackerItemDto post(ExecutionContext context, String content) {
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
@@ -199,82 +241,116 @@ public class CodebeamerApiClient {
 		stringEntity.setContentType("application/json");
 		post.setEntity(stringEntity);
 
+		context.logFormat("Execute post request /rest/item with content: <%s>", content);
+
 		try {
 			HttpResponse response = this.client.execute(post);
-			String json = new BasicResponseHandler().handleResponse(response);
-			post.releaseConnection();
 
-			stopWatch.stop();
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == HttpStatus.SC_OK) {
+				String json = new BasicResponseHandler().handleResponse(response);
 
-			context.log("Post request completed in: " + stopWatch.getTime());
+				TrackerItemDto readValue = this.objectMapper.readValue(json, TrackerItemDto.class);
+				stopWatch.stop();
+				context.logFormat("Post request completed in: %d ms", stopWatch.getTime());
+				return readValue;
+			}
 
-			stopWatch = new StopWatch();
-			stopWatch.start();
+			context.logFormat("Failed to post tracker item! Return code: %d", statusCode);
 
-			TrackerItemDto readValue = this.objectMapper.readValue(json, TrackerItemDto.class);
-			stopWatch.stop();
-			context.log("Post result parsed in: " + stopWatch.getTime());
-			return readValue;
+			return null;
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
+			context.logFormat("Failed to post tracker item! Exception message: %s", e.getMessage());
+			throw new RuntimeException(e);
+		} finally {
+			post.releaseConnection();
 		}
 
 	}
 
+	/**
+	 * Put (update) an existing item to the codeBeamer
+	 *
+	 * @param context
+	 * @param dto
+	 * @return
+	 * @throws IOException
+	 */
 	public TrackerItemDto put(ExecutionContext context, Object dto) throws IOException {
 		String content = this.objectMapper.writeValueAsString(dto);
 		return this.put(context, content);
 	}
 
+	/**
+	 * Put the specified content as a tracker item json to codeBeamer
+	 * 
+	 * @param context
+	 * @param content
+	 * @return
+	 * @throws IOException
+	 */
 	private TrackerItemDto put(ExecutionContext context, String content) throws IOException {
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 
+		context.logFormat("Execute put request /rest/item with content: <%s>", content);
+
 		HttpPut put = new HttpPut(String.format("%s/rest/item", this.baseUrl));
 		put.setConfig(this.requestConfig);
 
-		StringEntity stringEntity = new StringEntity(content, "UTF-8");
-		stringEntity.setContentType("application/json");
-		put.setEntity(stringEntity);
+		try {
+			HttpResponse response = this.client.execute(put);
 
-		HttpResponse response = this.client.execute(put);
-		String json = new BasicResponseHandler().handleResponse(response);
-		put.releaseConnection();
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == HttpStatus.SC_OK) {
+				String json = new BasicResponseHandler().handleResponse(response);
 
-		stopWatch.stop();
-		context.log("Put request completed in: " + stopWatch.getTime());
-		stopWatch = new StopWatch();
-		stopWatch.start();
+				TrackerItemDto readValue = this.objectMapper.readValue(json, TrackerItemDto.class);
+				stopWatch.stop();
+				context.logFormat("Put request completed in: %d ms", stopWatch.getTime());
+				return readValue;
+			}
 
-		TrackerItemDto readValue = this.objectMapper.readValue(json, TrackerItemDto.class);
-		stopWatch.stop();
-		context.log("Post result parsed in: " + stopWatch.getTime());
+			context.logFormat("Failed to put tracker item! Return code: %d", statusCode);
 
-		return readValue;
+			return null;
+		} catch (Exception e) {
+			context.logFormat("Failed to put tracker item! Exception message: %s", e.getMessage());
+			throw new RuntimeException(e);
+		} finally {
+			put.releaseConnection();
+		}
 	}
 
-	private String get(String url) throws IOException {
+	/**
+	 * Executes a get HTTP request to the codeBeamer with the specified URL and
+	 * tries to parse the result as the given result class
+	 *
+	 * @param url
+	 * @param resultClass
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private <T> T get(String url, Class<?> resultClass) {
+
 		HttpGet get = new HttpGet(url);
 		get.setConfig(this.requestConfig);
-		HttpResponse response = this.client.execute(get);
-		int statusCode = response.getStatusLine().getStatusCode();
 
-		String result = null;
-		if (statusCode == 200) {
-			result = new BasicResponseHandler().handleResponse(response);
+		try {
+			HttpResponse response = this.client.execute(get);
+			int statusCode = response.getStatusLine().getStatusCode();
+			String result = null;
+			if (statusCode == HttpStatus.SC_OK) {
+				result = new BasicResponseHandler().handleResponse(response);
+				return (T) this.objectMapper.readValue(result, TrackerItemDto.class);
+			}
+			return null;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			get.releaseConnection();
 		}
-
-		get.releaseConnection();
-
-		return result;
 	}
 
-	private CredentialsProvider getCredentialsProvider(String username, String password) {
-		CredentialsProvider provider = new BasicCredentialsProvider();
-		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
-		provider.setCredentials(AuthScope.ANY, credentials);
-		return provider;
-	}
 }

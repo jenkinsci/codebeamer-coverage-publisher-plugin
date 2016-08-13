@@ -72,7 +72,7 @@ public class CodebeamerCoverageExecutor {
 					String.format("Test Case type: %s, supported: %s", TEST_CASE_TYPE_NAME, isTestCaseTypeSupported));
 
 			context.log("Load existing test cases.");
-			List<TrackerItemDto> testCases = client.getTrackerItemList(context);
+			List<TrackerItemDto> testCases = client.getTestCaseList(context);
 			context.logFormat("%d test cases found in tracker %d", testCases.size(), context.getTestCaseTrackerId());
 
 			context.log("Collect test case ids.");
@@ -311,7 +311,7 @@ public class CodebeamerCoverageExecutor {
 		Integer testSetTrackerId = context.getTestSetTrackerId();
 
 		// TODO Auto-generated method stub
-		return context.getClient().findOrCreateTrackerItem(context, testSetTrackerId, name, "--");
+		return context.getClient().findOrCreateTestSet(context, testSetTrackerId, name, "--");
 	}
 
 	/**
@@ -536,7 +536,7 @@ public class CodebeamerCoverageExecutor {
 					testCaseTrackerId, parentId);
 
 			// update status to accepted
-			context.getClient().updateTrackerItemStatus(context, newTackerItem.getId(), "Accepted");
+			context.getClient().updateTestCaseStatus(context, newTackerItem.getId(), "Accepted");
 
 			parentId = newTackerItem.getId();
 
