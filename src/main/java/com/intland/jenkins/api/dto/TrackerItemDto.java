@@ -16,6 +16,7 @@ public class TrackerItemDto {
 	private Integer id;
 	private String name;
 	private String uri;
+	private String status;
 	private TrackerItemDto tracker;
 	private TrackerItemDto parent;
 	private TrackerItemDto[] verifies;
@@ -193,5 +194,13 @@ public class TrackerItemDto {
 		return "TrackerItemDto [id=" + this.id + ", name=" + this.name + ", uri=" + this.uri + ", tracker="
 				+ this.tracker + ", parent=" + this.parent + ", verifies=" + Arrays.toString(this.verifies)
 				+ ", children=" + Arrays.toString(this.children) + ", testCases=" + this.testCases + "]";
+	}
+
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }
