@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
@@ -17,6 +18,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.intland.jenkins.api.CodebeamerApiClient;
+import com.intland.jenkins.api.dto.NamedDto;
 import com.intland.jenkins.api.dto.ReferenceDto;
 import com.intland.jenkins.api.dto.TestCaseDto;
 import com.intland.jenkins.api.dto.TestRunDto;
@@ -62,14 +64,17 @@ public class CodebeamerCoverageExecutor {
 		for (CoverageReport report : reports) {
 			context.logFormat("%s Parsing finished in %d ms!", report.toSummary(), stopWatch.getTime());
 
+			context.logFormat("Filtering packages (%d packages found by default)", report.getDirectories().size());
+			filterPackages(context, report);
+			context.logFormat("%d packages in report after filtering", report.getDirectories().size());
+
 			CodebeamerApiClient client = context.getClient();
 
 			context.log("Checking supported test case types...");
 			boolean isTestCaseTypeSupported = client.isTestCaseTypeSupported(context.getTestCaseTrackerId(),
 					TEST_CASE_TYPE_NAME);
 			context.setTestCaseTypeSupported(isTestCaseTypeSupported);
-			context.log(
-					String.format("Test Case type: %s, supported: %s", TEST_CASE_TYPE_NAME, isTestCaseTypeSupported));
+			context.logFormat("Test Case type: %s, supported: %s", TEST_CASE_TYPE_NAME, isTestCaseTypeSupported);
 
 			context.log("Load existing test cases.");
 			List<TrackerItemDto> testCases = client.getTestCaseList(context);
@@ -95,9 +100,63 @@ public class CodebeamerCoverageExecutor {
 	}
 
 	/**
+	 * Executes include or exclude filters
+	 *
+	 * @param context
+	 * @param report
+	 */
+	private static void filterPackages(ExecutionContext context, CoverageReport report) {
+		if (context.isIncludePackagesSpecified()) {
+			Set<String> includedPackages = context.getIncludePackagesSet();
+
+			if (includedPackages.size() > 0) {
+
+				context.logFormat("Execute inclusion filter: <{}>", includedPackages);
+
+				List<DirectoryCoverage> acceptedCoverages = new ArrayList<>();
+
+				for (DirectoryCoverage directory : report.getDirectories()) {
+					for (String packageName : includedPackages) {
+						if (StringUtils.startsWith(directory.getName(), packageName)) {
+							context.logFormat("Package included: %s", directory.getName());
+							acceptedCoverages.add(directory);
+							break;
+						}
+					}
+				}
+
+				report.setDirectories(acceptedCoverages);
+				return;
+			}
+		}
+
+		if (context.isIncludePackagesSpecified()) {
+			Set<String> excludedPackages = context.getExcludePackageSet();
+
+			if (excludedPackages.size() > 0) {
+
+				context.logFormat("Execute exclusion filter: <%s>", excludedPackages);
+
+				Iterator<DirectoryCoverage> iterator = report.getDirectories().iterator();
+				while (iterator.hasNext()) {
+					DirectoryCoverage directory = iterator.next();
+					for (String packageName : excludedPackages) {
+						if (StringUtils.startsWith(directory.getName(), packageName)) {
+							context.logFormat("Package excluded: %s", directory.getName());
+							iterator.remove();
+							break;
+						}
+					}
+				}
+			}
+		}
+
+	}
+
+	/**
 	 * This method will iterate over all report result and create and upload a
 	 * new test case run for each result entry using the specified properties
-	 * 
+	 *
 	 * @param report
 	 *            the full coverage report
 	 * @param testCasesForCurrentResults
@@ -206,7 +265,7 @@ public class CodebeamerCoverageExecutor {
 
 		TrackerItemDto trackerItemDto = new TrackerItemDto();
 		trackerItemDto.setUri(coverageTestSet.getUri());
-		trackerItemDto.setStatus(status);
+		trackerItemDto.setStatus(new NamedDto(status));
 		trackerItemDto.setTestCases(testCasesList);
 
 		context.getClient().put(context, trackerItemDto);

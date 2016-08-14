@@ -94,6 +94,8 @@ public class CodeBeamerCoveragePublisher extends Notifier {
 		context.setSuccessInstructionCoverage(this.successInstructionCoverage);
 		context.setSuccessLineCoverage(this.successLineCoverage);
 		context.setSuccessMethodCoverage(this.successMethodCoverage);
+		context.setExcludedPackages(this.excludedPackages);
+		context.setIncludedPackages(this.includedPackages);
 
 		// execute the coverage
 		CodebeamerCoverageExecutor.execute(context);

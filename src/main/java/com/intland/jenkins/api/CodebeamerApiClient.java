@@ -8,8 +8,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -42,6 +45,11 @@ import com.intland.jenkins.coverage.ExecutionContext;
  * @author abanfi
  */
 public class CodebeamerApiClient {
+
+	private static Set<Integer> SUCCESSFUL_STATUSES = new HashSet<>(
+			Arrays.asList(HttpStatus.SC_ACCEPTED, HttpStatus.SC_OK, HttpStatus.SC_CREATED,
+					HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION, HttpStatus.SC_NO_CONTENT, HttpStatus.SC_RESET_CONTENT,
+					HttpStatus.SC_PARTIAL_CONTENT, HttpStatus.SC_MULTI_STATUS));
 
 	private final int HTTP_TIMEOUT = 300000;
 	private HttpClient client;
@@ -100,7 +108,7 @@ public class CodebeamerApiClient {
 			testSetDto.setDescription(description);
 
 			TrackerItemDto trackerItem = this.postTrackerItem(context, testSetDto);
-			context.logFormat("New test set succesfully created: <%s>", testSetDto);
+			context.logFormat("New test set succesfully created: <%s>", trackerItem);
 			return trackerItem;
 		}
 	}
@@ -241,13 +249,13 @@ public class CodebeamerApiClient {
 		stringEntity.setContentType("application/json");
 		post.setEntity(stringEntity);
 
-		context.logFormat("Execute post request /rest/item with content: <%s>", content);
+		context.logFormat("Execute post request /rest/item with content: <%s>", StringUtils.abbreviate(content, 200));
 
 		try {
 			HttpResponse response = this.client.execute(post);
 
-			int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode == HttpStatus.SC_OK) {
+			Integer statusCode = response.getStatusLine().getStatusCode();
+			if (SUCCESSFUL_STATUSES.contains(statusCode)) {
 				String json = new BasicResponseHandler().handleResponse(response);
 
 				TrackerItemDto readValue = this.objectMapper.readValue(json, TrackerItemDto.class);
@@ -283,7 +291,7 @@ public class CodebeamerApiClient {
 
 	/**
 	 * Put the specified content as a tracker item json to codeBeamer
-	 * 
+	 *
 	 * @param context
 	 * @param content
 	 * @return
@@ -294,16 +302,20 @@ public class CodebeamerApiClient {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 
-		context.logFormat("Execute put request /rest/item with content: <%s>", content);
+		context.logFormat("Execute put request /rest/item with content: <%s>", StringUtils.abbreviate(content, 200));
 
 		HttpPut put = new HttpPut(String.format("%s/rest/item", this.baseUrl));
 		put.setConfig(this.requestConfig);
 
+		StringEntity stringEntity = new StringEntity(content, "UTF-8");
+		stringEntity.setContentType("application/json");
+		put.setEntity(stringEntity);
+
 		try {
 			HttpResponse response = this.client.execute(put);
 
-			int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode == HttpStatus.SC_OK) {
+			Integer statusCode = response.getStatusLine().getStatusCode();
+			if (SUCCESSFUL_STATUSES.contains(statusCode)) {
 				String json = new BasicResponseHandler().handleResponse(response);
 
 				TrackerItemDto readValue = this.objectMapper.readValue(json, TrackerItemDto.class);
@@ -339,11 +351,11 @@ public class CodebeamerApiClient {
 
 		try {
 			HttpResponse response = this.client.execute(get);
-			int statusCode = response.getStatusLine().getStatusCode();
+			Integer statusCode = response.getStatusLine().getStatusCode();
 			String result = null;
-			if (statusCode == HttpStatus.SC_OK) {
+			if (SUCCESSFUL_STATUSES.contains(statusCode)) {
 				result = new BasicResponseHandler().handleResponse(response);
-				return (T) this.objectMapper.readValue(result, TrackerItemDto.class);
+				return (T) this.objectMapper.readValue(result, resultClass);
 			}
 			return null;
 		} catch (Exception e) {

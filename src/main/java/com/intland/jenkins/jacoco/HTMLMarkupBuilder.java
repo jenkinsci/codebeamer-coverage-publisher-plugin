@@ -1,9 +1,6 @@
 package com.intland.jenkins.jacoco;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -26,6 +23,16 @@ public class HTMLMarkupBuilder {
 			+ "<th class=\"textData\">Lines</th><th class=\"textData\">Methods</th>"
 			+ "<th class=\"textData\">Classes</th></tr></thead><tbody>";
 
+	private static String help = "<br><div class=\"information\">"
+			+ "<p><b>Instructions:</b> The smallest unit JaCoCo counts are single Java byte code instructions.</p>"
+			+ "<p><b>Branches:</b>This metric counts the total number of such branches in a method and determines the number of executed or missed branches</p>"
+			+ "<p><b>Cyclomatic Complexity:</b>The coverage also calculates cyclomatic complexity for each non-abstract method and summarizes complexity for classes, packages and groups.</p>"
+			+ "<p><b>Lines:</b>A source line is considered executed when at least one instruction that is assigned to this line has been executed.</p>"
+			+ "<p><b>Methods:</b>Each non-abstract method contains at least one instruction. A method is considered as executed when at least one instruction has been executed.</p>"
+			+ "<p><b>Classes:</b>A class is considered as executed when at least one of its methods has been executed. </p>"
+			+ "<p><a href=\"http://www.eclemma.org/jacoco/trunk/doc/counters.html\">More information</a></p>"
+			+ "</div>";
+
 	private static String INSTRUCTION = "INSTRUCTION";
 	private static String BRANCH = "BRANCH";
 	private static String COMPLEXITY = "COMPLEXITY";
@@ -34,8 +41,6 @@ public class HTMLMarkupBuilder {
 	private static String CLASS = "CLASS";
 
 	private static String[] COLUMNS = new String[] { INSTRUCTION, BRANCH, COMPLEXITY, LINE, METHOD, CLASS };
-
-	private static Set<String> WRITE_COUNT_COLUMNS = new HashSet<>(Arrays.asList(LINE, METHOD, CLASS));
 
 	/**
 	 * Generates a HTML markup for the specified class
@@ -54,6 +59,8 @@ public class HTMLMarkupBuilder {
 		appendTotal(builder, "all methods", clazz.getCounter());
 		builder.append("</tr></tbody></table>");
 
+		builder.append(help);
+
 		// method part
 		builder.append("<br><h2><b>Coverage Breakdown by Method</b></h2>");
 
@@ -62,7 +69,7 @@ public class HTMLMarkupBuilder {
 					StringUtils.replace(header, "Element", String.format("Element (%d)", clazz.getMethod().size())));
 			for (Method method : clazz.getMethod()) {
 				builder.append("<tr>");
-				builder.append("<td>");
+				builder.append("<td style=\"padding: 5px;\">");
 				builder.append(method.getName());
 				builder.append("</td>");
 
@@ -93,6 +100,8 @@ public class HTMLMarkupBuilder {
 		appendTotal(builder, "all classes", pack.getCounter());
 		builder.append("</tr></tbody></table>");
 
+		builder.append(help);
+
 		// classes part
 		builder.append("<br><h2><b>Coverage Breakdown by Class</b></h2>");
 		if (pack.getClazz() != null) {
@@ -101,7 +110,7 @@ public class HTMLMarkupBuilder {
 			for (com.intland.jenkins.jacoco.model.Class clazz : pack.getClazz()) {
 
 				builder.append("<tr>");
-				builder.append("<td>");
+				builder.append("<td style=\"padding: 5px;\">");
 				builder.append(StringUtils.substringAfterLast(clazz.getName(), "/"));
 				builder.append("</td>");
 
@@ -131,6 +140,8 @@ public class HTMLMarkupBuilder {
 		appendTotal(builder, "all packages", report.getCounter());
 		builder.append("</tr></tbody></table>");
 
+		builder.append(help);
+
 		builder.append("<br><h2><b>Coverage Breakdown by Package</b></h2>");
 
 		if (report.getPackage() != null) {
@@ -139,7 +150,7 @@ public class HTMLMarkupBuilder {
 			for (Package pack : report.getPackage()) {
 
 				builder.append("<tr>");
-				builder.append("<td>");
+				builder.append("<td style=\"padding: 5px;\">");
 				builder.append(StringUtils.isBlank(pack.getName()) ? "default"
 						: StringUtils.replace(pack.getName(), "/", "."));
 				builder.append("</td>");
@@ -164,7 +175,7 @@ public class HTMLMarkupBuilder {
 	 *            the coverage counters
 	 */
 	private static void appendTotal(StringBuilder builder, String label, List<Counter> counters) {
-		builder.append("<td>" + label + ":</td>");
+		builder.append("<td style=\"padding: 5px;\">" + label + ":</td>");
 		appendColumns(builder, counters);
 	}
 
@@ -178,7 +189,7 @@ public class HTMLMarkupBuilder {
 	 */
 	private static void appendColumns(StringBuilder builder, List<Counter> counter) {
 		for (String column : COLUMNS) {
-			builder.append("<td>");
+			builder.append("<td style=\"padding: 5px;\">");
 			builder.append(convertToMarkup(column, counter));
 			builder.append("</td>");
 		}
@@ -200,8 +211,7 @@ public class HTMLMarkupBuilder {
 			if (counter.getType().equals(type)) {
 				Integer all = counter.getMissed() + counter.getCovered();
 				Double percent = (counter.getCovered() / (double) all) * 100d;
-				return generateDiagramMarkup(WRITE_COUNT_COLUMNS.contains(type), counter.getMissed(),
-						counter.getCovered(), percent.intValue());
+				return generateDiagramMarkup(counter.getMissed(), counter.getCovered(), percent.intValue());
 			}
 		}
 
@@ -219,10 +229,9 @@ public class HTMLMarkupBuilder {
 	 *            coverage percentage
 	 * @return cell markup
 	 */
-	private static String generateDiagramMarkup(boolean writeOutCounts, Integer missed, Integer covered,
-			Integer coveredPercent) {
+	private static String generateDiagramMarkup(Integer missed, Integer covered, Integer coveredPercent) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("<div class=\"miniprogressbar\" style=\"width: 120px; height: 20px;\"> ");
+		builder.append("<div class=\"miniprogressbar\" style=\"width: 150px; height: 20px;\"> ");
 		builder.append("<div style=\"width:");
 		builder.append(coveredPercent);
 		builder.append("%; background-color:#00A85D;\"></div>");
@@ -231,12 +240,7 @@ public class HTMLMarkupBuilder {
 		builder.append("%; background-color:#CC3F44;\">");
 		builder.append("</div><div style=\"position: absolute; font-weight: bold; width: 100%; ");
 		builder.append("background: transparent; text-align: center; color: white; line-height: 20px;\">");
-		if (writeOutCounts) {
-			builder.append(String.format("%d/%d (%d%%)", covered + missed, missed, coveredPercent));
-		} else {
-			builder.append(coveredPercent);
-			builder.append("%");
-		}
+		builder.append(String.format("%d/%d (%d%%)", covered, covered + missed, coveredPercent));
 		builder.append("</div></div>");
 		return builder.toString();
 	}

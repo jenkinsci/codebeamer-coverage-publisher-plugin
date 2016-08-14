@@ -49,7 +49,7 @@
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Success Limit (percent)" help="/plugin/codebeamer-coverage-importer/help/help-successLimit.html">
+    <f:entry title="Success Limit (percent)" help="/plugin/codebeamer-coverage-importer/help/help-successLimits.html">
 		<table width="78%">
 	      	<col width="11%"/>
 	      	<col width="11%"/>

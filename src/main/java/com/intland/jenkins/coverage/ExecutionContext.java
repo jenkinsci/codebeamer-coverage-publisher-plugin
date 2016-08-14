@@ -3,7 +3,13 @@ package com.intland.jenkins.coverage;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.intland.jenkins.api.CodebeamerApiClient;
 
@@ -33,8 +39,8 @@ public class ExecutionContext {
 	private Integer testCaseParentId;
 	private Integer testRunTrackerId;
 	private Integer testConfigurationId;
-	private String[] includedPackages;
-	private String[] excludedPackages;
+	private String includedPackages;
+	private String excludedPackages;
 	private Integer successInstructionCoverage;
 	private Integer successBranchCoverage;
 	private Integer successComplexityCoverage;
@@ -42,6 +48,8 @@ public class ExecutionContext {
 	private Integer successMethodCoverage;
 	private Integer successClassCoverage;
 	private boolean testCaseTypeSupported;
+	private Set<String> includePackagesSet;
+	private Set<String> excludePackageSet;
 
 	public ExecutionContext(BuildListener listener, AbstractBuild<?, ?> build) {
 		this.listener = listener;
@@ -64,6 +72,29 @@ public class ExecutionContext {
 	public void log(String message) {
 		String log = String.format("%s %s", this.DATE_FORMAT.format(new Date()), message);
 		this.listener.getLogger().println(log);
+	}
+
+	public Set<String> getExcludePackageSet() {
+		if (this.excludePackageSet == null) {
+			this.excludePackageSet = getPackageEntries(this.excludedPackages);
+		}
+		return this.excludePackageSet;
+	}
+
+	public Set<String> getIncludePackagesSet() {
+		if (this.includePackagesSet == null) {
+			this.includePackagesSet = getPackageEntries(this.includedPackages);
+		}
+
+		return this.includePackagesSet;
+	}
+
+	public boolean isIncludePackagesSpecified() {
+		return this.getIncludePackagesSet().size() > 0;
+	}
+
+	public boolean isExcludePackagesSpecified() {
+		return this.getExcludePackageSet().size() > 0;
 	}
 
 	/**
@@ -161,19 +192,19 @@ public class ExecutionContext {
 		this.testConfigurationId = testConfigurationId;
 	}
 
-	public String[] getIncludedPackages() {
+	public String getIncludedPackages() {
 		return this.includedPackages;
 	}
 
-	public void setIncludedPackages(String[] includedPackages) {
+	public void setIncludedPackages(String includedPackages) {
 		this.includedPackages = includedPackages;
 	}
 
-	public String[] getExcludedPackages() {
+	public String getExcludedPackages() {
 		return this.excludedPackages;
 	}
 
-	public void setExcludedPackages(String[] excludedPackages) {
+	public void setExcludedPackages(String excludedPackages) {
 		this.excludedPackages = excludedPackages;
 	}
 
@@ -247,6 +278,24 @@ public class ExecutionContext {
 
 	public void setJacocReportPath(String jacocReportPath) {
 		this.jacocReportPath = jacocReportPath;
+	}
+
+	/**
+	 * Slits the specified package text into parts and return not blank values
+	 *
+	 * @param packagesString
+	 * @return
+	 */
+	private static Set<String> getPackageEntries(String packagesString) {
+
+		Set<String> packages = new HashSet<>();
+		List<String> packageList = Arrays.asList(StringUtils.split(packagesString, ";"));
+		for (String packageName : packageList) {
+			if (StringUtils.isNotBlank(packageName)) {
+				packages.add(StringUtils.trim(packageName));
+			}
+		}
+		return packages;
 	}
 
 }

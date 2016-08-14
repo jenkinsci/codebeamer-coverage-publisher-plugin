@@ -88,7 +88,7 @@ public class GcovHTMLMarkupBuilder {
 		builder.append(createHeader(false, false));
 
 		builder.append("<tr>");
-		builder.append("<td>" + base.getName() + ":</td>");
+		builder.append("<td style=\"padding: 5px;\">" + base.getName() + ":</td>");
 		appendColumns(builder, base, false);
 		builder.append("</tr>");
 
@@ -105,7 +105,7 @@ public class GcovHTMLMarkupBuilder {
 		builder.append("<tr>");
 
 		builder.append("<tr>");
-		builder.append("<td>Cobertura Coverage Report:</td>");
+		builder.append("<td style=\"padding: 5px;\">Cobertura Coverage Report:</td>");
 		appendPackageColumn(builder, report);
 		appendColumns(builder, report, true);
 		builder.append("</tr></tbody></table>");
@@ -117,7 +117,7 @@ public class GcovHTMLMarkupBuilder {
 			for (DirectoryCoverage directory : report.getDirectories()) {
 
 				builder.append("<tr>");
-				builder.append("<td>");
+				builder.append("<td style=\"padding: 5px;\">");
 				builder.append(StringUtils.isBlank(directory.getName()) ? "default"
 						: StringUtils.replace(directory.getName(), "/", "."));
 				builder.append("</td>");
@@ -149,7 +149,7 @@ public class GcovHTMLMarkupBuilder {
 			}
 		}
 
-		builder.append("<td>");
+		builder.append("<td style=\"padding: 5px;\">");
 		builder.append(convertToMarkup(packageMissed, packageCovered));
 		builder.append("</td>");
 	}
@@ -162,7 +162,7 @@ public class GcovHTMLMarkupBuilder {
 		builder.append(createHeader(false, true));
 
 		builder.append("<tr>");
-		builder.append("<td>" + directory.getName() + ":</td>");
+		builder.append("<td style=\"padding: 5px;\">" + directory.getName() + ":</td>");
 		appendColumns(builder, directory, true);
 		builder.append("</tr>");
 
@@ -176,7 +176,7 @@ public class GcovHTMLMarkupBuilder {
 			for (CoverageBase base : files) {
 
 				builder.append("<tr>");
-				builder.append("<td>" + base.getName() + ":</td>");
+				builder.append("<td style=\"padding: 5px;\">" + base.getName() + ":</td>");
 				appendColumns(builder, base, false);
 				builder.append("</tr>");
 
@@ -191,16 +191,16 @@ public class GcovHTMLMarkupBuilder {
 	private static void appendColumns(StringBuilder builder, CoverageBase base, boolean appendClass) {
 
 		if (appendClass) {
-			builder.append("<td>");
+			builder.append("<td style=\"padding: 5px;\">");
 			builder.append(convertToMarkup(base.getClassMissed(), base.getClassCovered()));
 			builder.append("</td>");
 		}
 
-		builder.append("<td>");
+		builder.append("<td style=\"padding: 5px;\">");
 		builder.append(convertToMarkup(base.getLineMissed(), base.getLineCovered()));
 		builder.append("</td>");
 
-		builder.append("<td>");
+		builder.append("<td style=\"padding: 5px;\">");
 		builder.append(convertToMarkup(base.getBranchMissed(), base.getBranchCovered()));
 		builder.append("</td>");
 
