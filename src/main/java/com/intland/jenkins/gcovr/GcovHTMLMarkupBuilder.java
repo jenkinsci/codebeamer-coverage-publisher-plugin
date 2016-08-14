@@ -32,6 +32,13 @@ public class GcovHTMLMarkupBuilder {
 		return builder.toString();
 	}
 
+	private static String help = "<br><div class=\"information\">"
+			+ "<p><b>Packages:</b>A package is considered as executed when at least one class has been executed.</p>"
+			+ "<p><b>Classes:</b>A class is considered as executed when at least one of its lines has been executed. </p>"
+			+ "<p><b>Lines:</b>A source line is considered executed when at least one instruction that is assigned to this line has been executed.</p>"
+			+ "<p><b>Conditionals:</b>This metric counts the total number of such branches in a method and determines the number of executed or missed branches</p>"
+			+ "</div>";
+
 	/**
 	 *
 	 * /** Converts a type of coverage into HTML markup
@@ -94,6 +101,8 @@ public class GcovHTMLMarkupBuilder {
 
 		builder.append("</tbody></table>");
 
+		builder.append(help);
+
 		return builder.toString();
 	}
 
@@ -109,6 +118,8 @@ public class GcovHTMLMarkupBuilder {
 		appendPackageColumn(builder, report);
 		appendColumns(builder, report, true);
 		builder.append("</tr></tbody></table>");
+
+		builder.append(help);
 
 		builder.append("<br><h2><b>Coverage Breakdown by Package</b></h2>");
 
@@ -167,6 +178,8 @@ public class GcovHTMLMarkupBuilder {
 		builder.append("</tr>");
 
 		builder.append("</tbody></table>");
+
+		builder.append(help);
 
 		builder.append("<br><h2><b>Coverage Breakdown by Class</b></h2>");
 
