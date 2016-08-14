@@ -18,7 +18,6 @@ import org.xml.sax.XMLReader;
 
 import com.intland.jenkins.coverage.ExecutionContext;
 import com.intland.jenkins.coverage.ICoverageCoverter;
-import com.intland.jenkins.coverage.markup.HTMLMarkupBuilder;
 import com.intland.jenkins.coverage.model.CoverageBase;
 import com.intland.jenkins.coverage.model.CoverageReport;
 import com.intland.jenkins.coverage.model.CoverageReport.CoverageType;

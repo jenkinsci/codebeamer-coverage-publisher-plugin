@@ -1,55 +1,55 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     
-    <f:entry title="Jacoco Report File Path" field="jacocoReportPath">
+    <f:entry title="Jacoco Report File Path" field="jacocoReportPath" help="/plugin/codebeamer-coverage-importer/help/help-jacocoReportPath.html">
       <f:textbox />
     </f:entry>
 
-    <f:entry title="Cobertura Report File Path" field="coberturaReportPath">
+    <f:entry title="Cobertura Report File Path" field="coberturaReportPath" help="/plugin/codebeamer-coverage-importer/help/help-coberturaReportPath.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Uri" field="uri">
+    <f:entry title="Url" field="uri" help="/plugin/codebeamer-coverage-importer/help/help-uri.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Username" field="username">
+    <f:entry title="Username" field="username" help="/plugin/codebeamer-coverage-importer/help/help-username.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Password" field="password">
+    <f:entry title="Password" field="password" help="/plugin/codebeamer-coverage-importer/help/help-password.html">
       <f:password />
     </f:entry>
     
-    <f:entry title="Test Configuration Item ID" field="testConfigurationId">
+    <f:entry title="Test Configuration Item ID" field="testConfigurationId" help="/plugin/codebeamer-coverage-importer/help/help-testConfigurationId.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Test Set Tracker ID" field="testSetTrackerId">
+    <f:entry title="Test Set Tracker ID" field="testSetTrackerId" help="/plugin/codebeamer-coverage-importer/help/help-testSetTrackerId.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Test Case Tracker ID" field="testCaseTrackerId">
+    <f:entry title="Test Case Tracker ID" field="testCaseTrackerId" help="/plugin/codebeamer-coverage-importer/help/help-testCaseTrackerId.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Test Case Top Node ID (optional)" field="testCaseParentId" help="/plugin/codebeamer-xunit-importer/help/help-testCaseParentId.html">
+    <f:entry title="Test Case Top Node ID (optional)" field="testCaseParentId" help="/plugin/codebeamer-coverage-importer/help/help-testCaseParentId.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Test Run Tracker ID" field="testRunTrackerId">
+    <f:entry title="Test Run Tracker ID" field="testRunTrackerId" help="/plugin/codebeamer-coverage-importer/help/help-testRunTrackerId.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Include Packages (optional)" field="includedPackages" help="/plugin/codebeamer-xunit-importer/help/help-includedPackages.html">
+    <f:entry title="Include Packages (optional)" field="includedPackages" help="/plugin/codebeamer-coverage-importer/help/help-includedPackages.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Exclude Packages (optional)" field="excludedPackages" help="/plugin/codebeamer-xunit-importer/help/help-excludedPackages.html">
+    <f:entry title="Exclude Packages (optional)" field="excludedPackages" help="/plugin/codebeamer-coverage-importer/help/help-excludedPackages.html">
       <f:textbox />
     </f:entry>
     
-    <f:entry title="Success Limit (percent)">
+    <f:entry title="Success Limit (percent)" help="/plugin/codebeamer-coverage-importer/help/help-successLimit.html">
 		<table width="78%">
 	      	<col width="11%"/>
 	      	<col width="11%"/>

@@ -1,4 +1,4 @@
-package com.intland.jenkins.coverage.markup;
+package com.intland.jenkins.jacoco;
 
 import java.util.Arrays;
 import java.util.HashSet;

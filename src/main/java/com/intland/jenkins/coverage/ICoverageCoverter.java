@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.intland.jenkins.coverage.model.CoverageReport;
 
 /**
- * Interface for coverage coverters
+ * Interface for coverage converters
  *
  * @author abanfi
  */

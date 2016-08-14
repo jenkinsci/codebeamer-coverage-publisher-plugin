@@ -10,6 +10,12 @@ import com.intland.jenkins.api.CodebeamerApiClient;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 
+/**
+ * The execution context which hold the execution properties and the jenkins
+ * build and listener classes
+ *
+ * @author abanfi
+ */
 public class ExecutionContext {
 
 	private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
