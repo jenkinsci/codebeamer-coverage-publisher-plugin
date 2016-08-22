@@ -25,8 +25,7 @@ public class TrackerSchemaDto {
 
 		if ((this.properties != null) && (this.properties.getType() != null)
 				&& (this.properties.getType().getSettings() != null)) {
-			TrackerTypeSettingDto[] settings = this.properties.getType().getSettings();
-			for (TrackerTypeSettingDto setting : settings) {
+			for (TrackerTypeSettingDto setting : this.properties.getType().getSettings()) {
 				if (setting.getName().equals(type)) {
 					result = true;
 					break;

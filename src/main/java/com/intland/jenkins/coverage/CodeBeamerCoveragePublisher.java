@@ -2,8 +2,6 @@ package com.intland.jenkins.coverage;
 
 import java.io.IOException;
 
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -18,12 +16,10 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 
-@SuppressWarnings("unchecked")
-public class CodeBeamerCoveragePublisher extends Notifier {
+public class CodeBeamerCoveragePublisher extends Publisher {
 
 	private String uri;
 	private String jacocoReportPath;
@@ -44,26 +40,6 @@ public class CodeBeamerCoveragePublisher extends Notifier {
 	private Integer successLineCoverage;
 	private Integer successMethodCoverage;
 	private Integer successClassCoverage;
-
-	@DataBoundConstructor
-	public CodeBeamerCoveragePublisher() {
-		this.uri = StringUtils.EMPTY;
-		this.username = StringUtils.EMPTY;
-		this.password = StringUtils.EMPTY;
-		this.testSetTrackerId = null;
-		this.testCaseTrackerId = null;
-		this.testCaseParentId = null;
-		this.testRunTrackerId = null;
-		this.testConfigurationId = null;
-		this.includedPackages = StringUtils.EMPTY;
-		this.excludedPackages = StringUtils.EMPTY;
-		this.successInstructionCoverage = 0;
-		this.successBranchCoverage = 0;
-		this.successComplexityCoverage = 0;
-		this.successLineCoverage = 0;
-		this.successMethodCoverage = 0;
-		this.successClassCoverage = 0;
-	}
 
 	@Override
 	public BuildStepMonitor getRequiredMonitorService() {

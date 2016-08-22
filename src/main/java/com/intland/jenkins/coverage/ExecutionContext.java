@@ -2,6 +2,7 @@ package com.intland.jenkins.coverage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -13,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.intland.jenkins.api.CodebeamerApiClient;
 
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 
@@ -58,9 +60,14 @@ public class ExecutionContext {
 
 	public File getRootDirectory() {
 		try {
-			return new File(this.build.getWorkspace().toURI());
+			FilePath path = this.build != null ? this.build.getWorkspace() : null;
+			URI uri = path != null ? path.toURI() : null;
+
+			if (uri != null) {
+				return new File(uri);
+			}
 		} catch (IOException | InterruptedException e) {
-			this.log("Workspace root path cannot be resolved!");
+			this.logFormat("Workspace root path cannot be resolved: %s", e.getMessage());
 		}
 		return null;
 	}

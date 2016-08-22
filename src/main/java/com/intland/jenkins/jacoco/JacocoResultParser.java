@@ -1,7 +1,8 @@
 package com.intland.jenkins.jacoco;
 
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +38,7 @@ public class JacocoResultParser implements ICoverageCoverter {
 
 	@Override
 	public CoverageReport collectCoverageReport(String reportFilePath, ExecutionContext context) throws IOException {
-		try {
+		try (InputStream stream = new FileInputStream(reportFilePath)) {
 
 			// create parser
 			JAXBContext jaxbContext = JAXBContext.newInstance(Report.class);
@@ -45,7 +46,7 @@ public class JacocoResultParser implements ICoverageCoverter {
 			spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			spf.setFeature("http://xml.org/sax/features/validation", false);
 			XMLReader xmlReader = spf.newSAXParser().getXMLReader();
-			InputSource inputSource = new InputSource(new FileReader(reportFilePath));
+			InputSource inputSource = new InputSource(stream);
 			SAXSource source = new SAXSource(xmlReader, inputSource);
 
 			// unmarshall the XML

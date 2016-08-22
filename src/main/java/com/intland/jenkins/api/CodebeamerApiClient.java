@@ -51,7 +51,7 @@ public class CodebeamerApiClient {
 					HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION, HttpStatus.SC_NO_CONTENT, HttpStatus.SC_RESET_CONTENT,
 					HttpStatus.SC_PARTIAL_CONTENT, HttpStatus.SC_MULTI_STATUS));
 
-	private final int HTTP_TIMEOUT = 300000;
+	private final static int HTTP_TIMEOUT = 300000;
 	private HttpClient client;
 	private RequestConfig requestConfig;
 	private String baseUrl;
@@ -67,8 +67,8 @@ public class CodebeamerApiClient {
 		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
 		provider.setCredentials(AuthScope.ANY, credentials);
 		this.client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
-		this.requestConfig = RequestConfig.custom().setConnectionRequestTimeout(this.HTTP_TIMEOUT)
-				.setConnectTimeout(this.HTTP_TIMEOUT).setSocketTimeout(this.HTTP_TIMEOUT).build();
+		this.requestConfig = RequestConfig.custom().setConnectionRequestTimeout(HTTP_TIMEOUT)
+				.setConnectTimeout(HTTP_TIMEOUT).setSocketTimeout(HTTP_TIMEOUT).build();
 	}
 
 	/**
@@ -82,7 +82,6 @@ public class CodebeamerApiClient {
 	 * @param description
 	 *            the new item's description
 	 * @return the found or the newly created tracker item
-	 * @throws IOException
 	 */
 	public TrackerItemDto findOrCreateTestSet(ExecutionContext context, Integer trackerId, String name,
 			String description) throws IOException {
@@ -95,7 +94,7 @@ public class CodebeamerApiClient {
 		PagedTrackerItemsDto pagedTrackerItemsDto = this.get(requestUrl, PagedTrackerItemsDto.class);
 
 		if (pagedTrackerItemsDto.getTotal() > 0) {
-			TrackerItemDto testSetDto = pagedTrackerItemsDto.getItems()[0];
+			TrackerItemDto testSetDto = pagedTrackerItemsDto.getItems().get(0);
 			context.logFormat("%d Tracker item found, returns with the first: <%s>", pagedTrackerItemsDto.getTotal(),
 					testSetDto);
 			return testSetDto;
@@ -136,7 +135,6 @@ public class CodebeamerApiClient {
 	 * @param context
 	 * @param testRunDto
 	 * @return
-	 * @throws IOException
 	 */
 	public TrackerItemDto postTrackerItem(ExecutionContext context, TestRunDto testRunDto) throws IOException {
 		String content = this.objectMapper.writeValueAsString(testRunDto);
@@ -149,8 +147,6 @@ public class CodebeamerApiClient {
 	 * @param trackerId
 	 *            the tracker's id
 	 * @return all of the tracker item in the tracker
-	 *
-	 * @throws IOException
 	 */
 	public List<TrackerItemDto> getTestCaseList(ExecutionContext context) throws IOException {
 
@@ -166,7 +162,7 @@ public class CodebeamerApiClient {
 			// get a page from codebeamer
 			PagedTrackerItemsDto pagedTrackerItemsDto = this.get(pageUrl, PagedTrackerItemsDto.class);
 			total = pagedTrackerItemsDto.getTotal();
-			items.addAll(Arrays.asList(pagedTrackerItemsDto.getItems()));
+			items.addAll(pagedTrackerItemsDto.getItems());
 
 			context.logFormat("Page %d loaded, all items: %d (all items count: %d)", pageCount, items.size(), total);
 			pageCount++;
@@ -182,7 +178,6 @@ public class CodebeamerApiClient {
 	 * @param testCaseTrackerId
 	 * @param testCaseType
 	 * @return
-	 * @throws IOException
 	 */
 	public boolean isTestCaseTypeSupported(Integer testCaseTrackerId, String testCaseType) throws IOException {
 		String url = String.format("%s/rest/tracker/%s/schema", this.baseUrl, testCaseTrackerId);
@@ -200,7 +195,6 @@ public class CodebeamerApiClient {
 	 * @param status
 	 *            the new status
 	 * @return the updated value
-	 * @throws IOException
 	 */
 	public TrackerItemDto updateTestCaseStatus(ExecutionContext context, Integer id, String status) throws IOException {
 		TestCaseDto testCaseDto = new TestCaseDto(id, status);
@@ -213,7 +207,6 @@ public class CodebeamerApiClient {
 	 *
 	 * @param itemId
 	 * @return
-	 * @throws IOException
 	 */
 	public TrackerItemDto getTrackerItem(Integer itemId) throws IOException {
 		return this.get(String.format("%s/rest/item/%s", this.baseUrl, itemId), TrackerItemDto.class);
@@ -224,7 +217,6 @@ public class CodebeamerApiClient {
 	 *
 	 * @param trackerId
 	 * @return
-	 * @throws IOException
 	 */
 	public TrackerDto getTracker(Integer trackerId) throws IOException {
 		return this.get(String.format("%s/rest/tracker/%s", this.baseUrl, trackerId), TrackerDto.class);
@@ -282,7 +274,6 @@ public class CodebeamerApiClient {
 	 * @param context
 	 * @param dto
 	 * @return
-	 * @throws IOException
 	 */
 	public TrackerItemDto put(ExecutionContext context, Object dto) throws IOException {
 		String content = this.objectMapper.writeValueAsString(dto);
@@ -295,7 +286,6 @@ public class CodebeamerApiClient {
 	 * @param context
 	 * @param content
 	 * @return
-	 * @throws IOException
 	 */
 	private TrackerItemDto put(ExecutionContext context, String content) throws IOException {
 

@@ -3,12 +3,15 @@
  */
 package com.intland.jenkins.api.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PagedTrackerItemsDto {
 	private Integer total;
-	private TrackerItemDto[] items;
+	private List<TrackerItemDto> items = new ArrayList<>();
 
 	public Integer getTotal() {
 		return this.total;
@@ -18,11 +21,11 @@ public class PagedTrackerItemsDto {
 		this.total = total;
 	}
 
-	public TrackerItemDto[] getItems() {
+	public List<TrackerItemDto> getItems() {
 		return this.items;
 	}
 
-	public void setItems(TrackerItemDto[] items) {
+	public void setItems(List<TrackerItemDto> items) {
 		this.items = items;
 	}
 }

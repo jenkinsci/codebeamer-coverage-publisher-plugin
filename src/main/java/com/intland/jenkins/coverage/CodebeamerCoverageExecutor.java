@@ -44,7 +44,7 @@ public class CodebeamerCoverageExecutor {
 	 *
 	 * @param context
 	 *            the context of the execution {@link ExecutionContext}
-	 * @throws IOException
+	 * 
 	 */
 	public static void execute(ExecutionContext context) throws IOException {
 
@@ -167,7 +167,7 @@ public class CodebeamerCoverageExecutor {
 	 *            the parent test run
 	 * @param context
 	 *            the execution context
-	 * @throws IOException
+	 * 
 	 */
 	private static void uploadResults(CoverageReport report, Map<String, Integer> testCasesForCurrentResults,
 			TrackerItemDto coverageTestSet, TrackerItemDto coverageTestRun, ExecutionContext context)
@@ -254,7 +254,7 @@ public class CodebeamerCoverageExecutor {
 	 *            the new status
 	 * @param context
 	 *            the execution context
-	 * @throws IOException
+	 * 
 	 */
 	private static void updateTestSetTestCasesAndStatus(TrackerItemDto coverageTestSet, Collection<Integer> testCases,
 			String status, ExecutionContext context) throws IOException {
@@ -286,7 +286,7 @@ public class CodebeamerCoverageExecutor {
 	 *            the related test case
 	 * @param context
 	 *            the execution context
-	 * @throws IOException
+	 * 
 	 */
 	private static void createTestCaseRun(Integer testConfigurationId, TrackerItemDto coverageTestSet,
 			TrackerItemDto coverageTestRun, CoverageBase coverageBase, Integer testCaseId, ExecutionContext context)
@@ -383,7 +383,7 @@ public class CodebeamerCoverageExecutor {
 	 * @param testSetDto
 	 * @param context
 	 * @return
-	 * @throws IOException
+	 * 
 	 */
 	private static TrackerItemDto createTestRun(CoverageReport report, Map<String, Integer> testCasesForCurrentResults,
 			TrackerItemDto testSetDto, ExecutionContext context) throws IOException {
@@ -410,7 +410,7 @@ public class CodebeamerCoverageExecutor {
 	 * @param context
 	 *            the context of the execution {@link ExecutionContext}
 	 * @return the test set for the current build
-	 * @throws IOException
+	 * 
 	 */
 	private static TrackerItemDto getOrCreateTestSet(ExecutionContext context) throws IOException {
 
@@ -431,7 +431,7 @@ public class CodebeamerCoverageExecutor {
 	 * @param context
 	 *            the context of the execution {@link ExecutionContext}
 	 * @return a name - test case id map
-	 * @throws IOException
+	 * 
 	 */
 	private static Map<String, Integer> collectTestCaseIds(CoverageReport report, List<TrackerItemDto> testCases,
 			ExecutionContext context) throws IOException {
@@ -442,7 +442,7 @@ public class CodebeamerCoverageExecutor {
 
 					@Override
 					public Integer apply(TrackerItemDto itemDto) {
-						return itemDto.getId();
+						return itemDto != null ? itemDto.getId() : null;
 					}
 				});
 
@@ -577,7 +577,7 @@ public class CodebeamerCoverageExecutor {
 	 *            existing test cases from the test case which set by the
 	 *            configuration mapped by name
 	 * @return the tracker item dto for the name
-	 * @throws IOException
+	 * 
 	 */
 	private static TrackerItemDto searchForOrCreateTestCase(String name, TrackerItemDto parent,
 			ExecutionContext context, Map<String, TrackerItemDto> testCasesMapByName) throws IOException {
@@ -606,7 +606,7 @@ public class CodebeamerCoverageExecutor {
 	 * @param context
 	 *            the context of the execution {@link ExecutionContext}
 	 * @return the created test case as a tracker item
-	 * @throws IOException
+	 * 
 	 */
 	private static TrackerItemDto createNewTestCase(String name, TrackerItemDto parentTestCase,
 			Map<String, TrackerItemDto> testCasesMapByName, ExecutionContext context) throws IOException {
@@ -661,7 +661,7 @@ public class CodebeamerCoverageExecutor {
 	 * @param context
 	 *            the context of the execution {@link ExecutionContext}
 	 * @return the common coverage report result {@link CoverageReport}
-	 * @throws IOException
+	 * 
 	 */
 	private static List<CoverageReport> loadReport(ExecutionContext context) throws IOException {
 

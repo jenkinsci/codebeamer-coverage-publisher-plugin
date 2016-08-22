@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.intland.jenkins.coverage.model.CoverageReport;
 
-public class JacocoResultParserTests {
+public class JacocoResultParserTest {
 
 	@Test
 	public void testCollectCoverageReport() throws IOException {

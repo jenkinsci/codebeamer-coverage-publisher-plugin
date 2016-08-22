@@ -19,7 +19,6 @@ public interface ICoverageCoverter {
 	 * @param context
 	 *            the execution context
 	 * @return the parsed coverage report object
-	 * @throws IOException
 	 */
 	public CoverageReport collectCoverageReport(String reportFilePath, ExecutionContext context) throws IOException;
 

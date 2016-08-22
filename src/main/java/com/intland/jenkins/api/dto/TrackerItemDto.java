@@ -3,7 +3,7 @@
  */
 package com.intland.jenkins.api.dto;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,8 +19,8 @@ public class TrackerItemDto {
 	private NamedDto status;
 	private TrackerItemDto tracker;
 	private TrackerItemDto parent;
-	private TrackerItemDto[] verifies;
-	private TrackerItemDto[] children;
+	private List<TrackerItemDto> verifies = new ArrayList<>();
+	private List<TrackerItemDto> children = new ArrayList<>();
 	private List<Object[]> testCases;
 
 	public TrackerItemDto() {
@@ -30,7 +30,7 @@ public class TrackerItemDto {
 		this.setUri(uri);
 	}
 
-	public TrackerItemDto(String uri, TrackerItemDto[] verifies) {
+	public TrackerItemDto(String uri, List<TrackerItemDto> verifies) {
 		this.setUri(uri);
 		this.setVerifies(verifies);
 	}
@@ -56,11 +56,11 @@ public class TrackerItemDto {
 		return this.uri;
 	}
 
-	public TrackerItemDto[] getChildren() {
+	public List<TrackerItemDto> getChildren() {
 		return this.children;
 	}
 
-	public void setChildren(TrackerItemDto[] children) {
+	public void setChildren(List<TrackerItemDto> children) {
 		this.children = children;
 	}
 
@@ -72,11 +72,11 @@ public class TrackerItemDto {
 		this.parent = parent;
 	}
 
-	public TrackerItemDto[] getVerifies() {
+	public List<TrackerItemDto> getVerifies() {
 		return this.verifies;
 	}
 
-	public void setVerifies(TrackerItemDto[] verifies) {
+	public void setVerifies(List<TrackerItemDto> verifies) {
 		this.verifies = verifies;
 	}
 
@@ -123,7 +123,11 @@ public class TrackerItemDto {
 			return false;
 		}
 		TrackerItemDto other = (TrackerItemDto) obj;
-		if (!Arrays.equals(this.children, other.children)) {
+		if (this.children == null) {
+			if (other.children != null) {
+				return false;
+			}
+		} else if (!this.children.equals(other.children)) {
 			return false;
 		}
 		if (this.id == null) {
@@ -147,6 +151,13 @@ public class TrackerItemDto {
 		} else if (!this.parent.equals(other.parent)) {
 			return false;
 		}
+		if (this.status == null) {
+			if (other.status != null) {
+				return false;
+			}
+		} else if (!this.status.equals(other.status)) {
+			return false;
+		}
 		if (this.testCases == null) {
 			if (other.testCases != null) {
 				return false;
@@ -168,7 +179,11 @@ public class TrackerItemDto {
 		} else if (!this.uri.equals(other.uri)) {
 			return false;
 		}
-		if (!Arrays.equals(this.verifies, other.verifies)) {
+		if (this.verifies == null) {
+			if (other.verifies != null) {
+				return false;
+			}
+		} else if (!this.verifies.equals(other.verifies)) {
 			return false;
 		}
 		return true;
@@ -178,22 +193,23 @@ public class TrackerItemDto {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + Arrays.hashCode(this.children);
+		result = (prime * result) + ((this.children == null) ? 0 : this.children.hashCode());
 		result = (prime * result) + ((this.id == null) ? 0 : this.id.hashCode());
 		result = (prime * result) + ((this.name == null) ? 0 : this.name.hashCode());
 		result = (prime * result) + ((this.parent == null) ? 0 : this.parent.hashCode());
+		result = (prime * result) + ((this.status == null) ? 0 : this.status.hashCode());
 		result = (prime * result) + ((this.testCases == null) ? 0 : this.testCases.hashCode());
 		result = (prime * result) + ((this.tracker == null) ? 0 : this.tracker.hashCode());
 		result = (prime * result) + ((this.uri == null) ? 0 : this.uri.hashCode());
-		result = (prime * result) + Arrays.hashCode(this.verifies);
+		result = (prime * result) + ((this.verifies == null) ? 0 : this.verifies.hashCode());
 		return result;
 	}
 
 	@Override
 	public String toString() {
-		return "TrackerItemDto [id=" + this.id + ", name=" + this.name + ", uri=" + this.uri + ", tracker="
-				+ this.tracker + ", parent=" + this.parent + ", verifies=" + Arrays.toString(this.verifies)
-				+ ", children=" + Arrays.toString(this.children) + ", testCases=" + this.testCases + "]";
+		return "TrackerItemDto [id=" + this.id + ", name=" + this.name + ", uri=" + this.uri + ", status=" + this.status
+				+ ", tracker=" + this.tracker + ", parent=" + this.parent + ", verifies=" + this.verifies
+				+ ", children=" + this.children + ", testCases=" + this.testCases + "]";
 	}
 
 	public NamedDto getStatus() {

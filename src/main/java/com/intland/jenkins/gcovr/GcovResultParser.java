@@ -1,7 +1,8 @@
 package com.intland.jenkins.gcovr;
 
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -35,7 +36,7 @@ public class GcovResultParser implements ICoverageCoverter {
 
 	@Override
 	public CoverageReport collectCoverageReport(String reportFilePath, ExecutionContext context) throws IOException {
-		try {
+		try (InputStream stream = new FileInputStream(reportFilePath)) {
 
 			// create parser
 			JAXBContext jaxbContext = JAXBContext.newInstance(Coverage.class);
@@ -43,7 +44,7 @@ public class GcovResultParser implements ICoverageCoverter {
 			spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			spf.setFeature("http://xml.org/sax/features/validation", false);
 			XMLReader xmlReader = spf.newSAXParser().getXMLReader();
-			InputSource inputSource = new InputSource(new FileReader(reportFilePath));
+			InputSource inputSource = new InputSource(stream);
 			SAXSource source = new SAXSource(xmlReader, inputSource);
 
 			// unmarshall the XML
@@ -77,12 +78,12 @@ public class GcovResultParser implements ICoverageCoverter {
 			coverageReport.getDirectories().add(this.converPackage(onePackage));
 		}
 
-		int missed = 0;
-		int covered = 0;
-		int missedConditional = 0;
-		int coveredConditional = 0;
-		int classesCovered = 0;
-		int classesMissed = 0;
+		Integer missed = 0;
+		Integer covered = 0;
+		Integer missedConditional = 0;
+		Integer coveredConditional = 0;
+		Integer classesCovered = 0;
+		Integer classesMissed = 0;
 
 		for (DirectoryCoverage classCoverage : coverageReport.getDirectories()) {
 			missed += classCoverage.getLineMissed();
@@ -128,12 +129,12 @@ public class GcovResultParser implements ICoverageCoverter {
 			}
 		}
 
-		int missed = 0;
-		int covered = 0;
-		int missedConditional = 0;
-		int coveredConditional = 0;
-		int classesCovered = 0;
-		int classesMissed = 0;
+		Integer missed = 0;
+		Integer covered = 0;
+		Integer missedConditional = 0;
+		Integer coveredConditional = 0;
+		Integer classesCovered = 0;
+		Integer classesMissed = 0;
 
 		for (CoverageBase classCoverage : directoryCoverage.getFiles()) {
 			missed += classCoverage.getLineMissed();
@@ -188,10 +189,10 @@ public class GcovResultParser implements ICoverageCoverter {
 		if (allLines != null) {
 			List<Line> lines = allLines.getLine();
 
-			int missed = 0;
-			int covered = 0;
-			int allConditional = 0;
-			int coveredConditional = 0;
+			Integer missed = 0;
+			Integer covered = 0;
+			Integer allConditional = 0;
+			Integer coveredConditional = 0;
 
 			for (Line line : lines) {
 				if ("0".equals(line.getHits())) {
@@ -211,8 +212,8 @@ public class GcovResultParser implements ICoverageCoverter {
 							String[] coverageResult = StringUtils.split(coveragePart, "/");
 
 							if ((coverageResult != null) && (coverageResult.length == 2)) {
-								coveredConditional += Integer.valueOf(coverageResult[0]);
-								allConditional += Integer.valueOf(coverageResult[1]);
+								coveredConditional += Integer.parseInt(coverageResult[0]);
+								allConditional += Integer.parseInt(coverageResult[1]);
 							}
 						}
 					}

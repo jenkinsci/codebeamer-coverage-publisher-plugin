@@ -4,6 +4,9 @@
 
 package com.intland.jenkins.api.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -13,13 +16,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class TrackerTypeDto {
 	private String title;
 	@JsonProperty(value = "enum")
-	private TrackerTypeSettingDto[] settings;
+	private List<TrackerTypeSettingDto> settings = new ArrayList<>();
 
-	public TrackerTypeSettingDto[] getSettings() {
+	public List<TrackerTypeSettingDto> getSettings() {
 		return this.settings;
 	}
 
-	public void setSettings(TrackerTypeSettingDto[] settings) {
+	public void setSettings(List<TrackerTypeSettingDto> settings) {
 		this.settings = settings;
 	}
 
