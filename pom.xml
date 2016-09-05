@@ -26,7 +26,7 @@
 
 	<artifactId>codebeamer-coverage-publisher</artifactId>
 	<packaging>hpi</packaging>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>Codebeamer Coverage Publisher Plugin</name>
 	<description>Uploads coverage results to codeBeamer</description>
 	<!-- <url>https://wiki.jenkins-ci.org/display/JENKINS/Codebeamer+Coverage+Publisher+Plugin</url> -->
@@ -43,7 +43,7 @@
 		<connection>scm:git:https://github.com/jenkinsci/codebeamer-coverage-publisher.git</connection>
 		<developerConnection>scm:git:https://github.com/jenkinsci/codebeamer-coverage-publisher.git</developerConnection>
 		<url>https://github.com/jenkinsci/codebeamer-coverage-publisher</url>
-		<tag>codebeamer-coverage-publisher-1.0.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<repositories>
