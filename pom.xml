@@ -41,9 +41,9 @@
 	</properties>
 
 	<scm>
-		<connection>scm:git:https://github.com/jenkinsci/codebeamer-coverage-publisher.git</connection>
-		<developerConnection>scm:git:https://github.com/jenkinsci/codebeamer-coverage-publisher.git</developerConnection>
-		<url>https://github.com/jenkinsci/codebeamer-coverage-publisher</url>
+		<connection>scm:git:https://github.com/jenkinsci/codebeamer-coverage-publisher-plugin.git</connection>
+		<developerConnection>scm:git:https://github.com/jenkinsci/codebeamer-coverage-publisher-plugin.git</developerConnection>
+		<url>https://github.com/jenkinsci/codebeamer-coverage-publisher-plugin</url>
 		<tag>HEAD</tag>
 	</scm>
 
