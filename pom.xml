@@ -37,6 +37,7 @@
 		<jackson.version>2.5.4</jackson.version>
 		<httpcomponents.version>4.3.6</httpcomponents.version>
 		<powermock.version>1.6.1</powermock.version>
+		<release.skipTests>true</release.skipTests>
 	</properties>
 
 	<scm>
