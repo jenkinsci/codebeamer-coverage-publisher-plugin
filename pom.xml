@@ -29,7 +29,7 @@
 	<version>1.0.7-SNAPSHOT</version>
 	<name>Codebeamer Coverage Publisher Plugin</name>
 	<description>Uploads coverage results to codeBeamer</description>
-	<!-- <url>https://wiki.jenkins-ci.org/display/JENKINS/Codebeamer+Coverage+Publisher+Plugin</url> -->
+	<url>https://wiki.jenkins-ci.org/display/JENKINS/CodeBeamer+Source+Code+Coverage+Publisher+Plugin</url>
 
 	<properties>
 		<jenkins.version>2.14</jenkins.version>
