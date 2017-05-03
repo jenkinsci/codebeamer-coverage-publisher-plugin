@@ -1,36 +1,23 @@
 package com.intland.jenkins.coverage;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.StopWatch;
-
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.intland.jenkins.api.CodebeamerApiClient;
-import com.intland.jenkins.api.dto.NamedDto;
-import com.intland.jenkins.api.dto.ReferenceDto;
-import com.intland.jenkins.api.dto.TestCaseDto;
-import com.intland.jenkins.api.dto.TestRunDto;
-import com.intland.jenkins.api.dto.TrackerItemDto;
+import com.intland.jenkins.api.dto.*;
 import com.intland.jenkins.coverage.model.CoverageBase;
 import com.intland.jenkins.coverage.model.CoverageReport;
 import com.intland.jenkins.coverage.model.CoverageReport.CoverageType;
 import com.intland.jenkins.coverage.model.DirectoryCoverage;
 import com.intland.jenkins.gcovr.GcovResultParser;
 import com.intland.jenkins.jacoco.JacocoResultParser;
-
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.StopWatch;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class CodebeamerCoverageExecutor {
 
@@ -210,6 +197,8 @@ public class CodebeamerCoverageExecutor {
 		}
 
 		updateTestSetTestCasesAndStatus(coverageTestSet, testCasesForCurrentResults.values(), "Completed", context);
+		TestCaseDto testCaseDto = new TestCaseDto(coverageTestRun.getId(), "Finished");
+		context.getClient().put(context, testCaseDto);
 	}
 
 	/**
@@ -312,7 +301,7 @@ public class CodebeamerCoverageExecutor {
 		TrackerItemDto testRunItem = context.getClient().postTrackerItem(context, testRunDto);
 
 		// update test case run to completed -
-		TestCaseDto testCaseDto = new TestCaseDto(testRunItem.getId(), "Completed");
+		TestCaseDto testCaseDto = new TestCaseDto(testRunItem.getId(), "Finished");
 		testCaseDto.setSpentMillis(0l);
 		context.getClient().put(context, testCaseDto);
 	}
