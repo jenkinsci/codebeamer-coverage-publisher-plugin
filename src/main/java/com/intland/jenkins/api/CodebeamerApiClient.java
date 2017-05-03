@@ -3,40 +3,31 @@
  */
 package com.intland.jenkins.api;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intland.jenkins.api.dto.*;
+import com.intland.jenkins.coverage.ExecutionContext;
+import jcifs.util.Base64;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intland.jenkins.api.dto.PagedTrackerItemsDto;
-import com.intland.jenkins.api.dto.TestCaseDto;
-import com.intland.jenkins.api.dto.TestRunDto;
-import com.intland.jenkins.api.dto.TrackerDto;
-import com.intland.jenkins.api.dto.TrackerItemDto;
-import com.intland.jenkins.api.dto.TrackerSchemaDto;
-import com.intland.jenkins.coverage.ExecutionContext;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * A service class that implement the data transfer between the codeBeamer and
@@ -63,12 +54,22 @@ public class CodebeamerApiClient {
 		this.objectMapper = new ObjectMapper();
 
 		// initialize rest client
-		CredentialsProvider provider = new BasicCredentialsProvider();
-		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
-		provider.setCredentials(AuthScope.ANY, credentials);
-		this.client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
-		this.requestConfig = RequestConfig.custom().setConnectionRequestTimeout(HTTP_TIMEOUT)
-				.setConnectTimeout(HTTP_TIMEOUT).setSocketTimeout(HTTP_TIMEOUT).build();
+        // http://stackoverflow.com/questions/9539141/httpclient-sends-out-two-requests-when-using-basic-auth
+		final String authHeader = "Basic " + Base64.encode((username + ":" + password).getBytes(Charsets.UTF_8));
+
+		HashSet<Header> defaultHeaders = new HashSet<Header>();
+		defaultHeaders.add(new BasicHeader(HttpHeaders.AUTHORIZATION, authHeader));
+
+		this.client = HttpClientBuilder
+				.create()
+				.setDefaultHeaders(defaultHeaders)
+				.build();
+		this.requestConfig = RequestConfig
+				.custom()
+				.setConnectionRequestTimeout(HTTP_TIMEOUT)
+				.setConnectTimeout(HTTP_TIMEOUT)
+				.setSocketTimeout(HTTP_TIMEOUT)
+				.build();
 	}
 
 	/**
