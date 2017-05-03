@@ -196,7 +196,7 @@ public class CodebeamerCoverageExecutor {
 			}
 		}
 
-		updateTestSetTestCasesAndStatus(coverageTestSet, testCasesForCurrentResults.values(), "Completed", context);
+		updateTestSetTestCasesAndStatus(coverageTestSet, testCasesForCurrentResults.values(), "Finished", context);
 		TestCaseDto testCaseDto = new TestCaseDto(coverageTestRun.getId(), "Finished");
 		context.getClient().put(context, testCaseDto);
 	}
