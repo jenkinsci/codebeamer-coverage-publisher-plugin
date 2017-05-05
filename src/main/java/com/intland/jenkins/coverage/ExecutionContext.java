@@ -1,22 +1,17 @@
 package com.intland.jenkins.coverage;
 
+import com.intland.jenkins.api.CodebeamerApiClient;
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.intland.jenkins.api.CodebeamerApiClient;
-
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import java.util.*;
 
 /**
  * The execution context which hold the execution properties and the jenkins
@@ -285,6 +280,13 @@ public class ExecutionContext {
 
 	public void setJacocReportPath(String jacocReportPath) {
 		this.jacocReportPath = jacocReportPath;
+	}
+
+	public String getBuildResultUrl() {
+		Jenkins jenkins = Jenkins.getInstance();
+		String rootUrl = jenkins.getRootUrl();
+		String jobUrl = build.getUrl();
+		return rootUrl + jobUrl;
 	}
 
 	/**

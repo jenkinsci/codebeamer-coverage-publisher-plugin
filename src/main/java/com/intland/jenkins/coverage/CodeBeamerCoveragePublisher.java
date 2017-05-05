@@ -1,16 +1,8 @@
 package com.intland.jenkins.coverage;
 
-import java.io.IOException;
-
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
 import com.intland.jenkins.api.CodebeamerApiClient;
 import com.intland.jenkins.api.dto.TrackerDto;
 import com.intland.jenkins.api.dto.TrackerItemDto;
-
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -20,6 +12,12 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
+import java.io.IOException;
 
 public class CodeBeamerCoveragePublisher extends Publisher {
 

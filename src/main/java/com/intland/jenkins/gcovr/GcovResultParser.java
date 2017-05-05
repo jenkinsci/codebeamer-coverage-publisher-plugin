@@ -1,31 +1,25 @@
 package com.intland.jenkins.gcovr;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.sax.SAXSource;
-
-import org.apache.commons.lang.StringUtils;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-
 import com.intland.jenkins.coverage.ExecutionContext;
 import com.intland.jenkins.coverage.ICoverageCoverter;
 import com.intland.jenkins.coverage.model.CoverageBase;
 import com.intland.jenkins.coverage.model.CoverageReport;
 import com.intland.jenkins.coverage.model.CoverageReport.CoverageType;
 import com.intland.jenkins.coverage.model.DirectoryCoverage;
-import com.intland.jenkins.gcovr.model.ClassesType;
-import com.intland.jenkins.gcovr.model.Coverage;
-import com.intland.jenkins.gcovr.model.Line;
-import com.intland.jenkins.gcovr.model.Lines;
+import com.intland.jenkins.gcovr.model.*;
 import com.intland.jenkins.gcovr.model.Package;
-import com.intland.jenkins.gcovr.model.Packages;
+import org.apache.commons.lang.StringUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * Coverage parser implementation for jacoco reports
@@ -52,7 +46,7 @@ public class GcovResultParser implements ICoverageCoverter {
 			Coverage report = (Coverage) jaxbUnmarshaller.unmarshal(source);
 
 			// convert result to the common form
-			return this.convertToCoverageReport(report);
+			return this.convertToCoverageReport(report, context);
 
 		} catch (Exception e) {
 			context.logFormat("Exception occurred during parse the jacoco result: %s", e.getMessage());
@@ -67,7 +61,7 @@ public class GcovResultParser implements ICoverageCoverter {
 	 *            the report to convert
 	 * @return the coverage report
 	 */
-	private CoverageReport convertToCoverageReport(Coverage report) {
+	private CoverageReport convertToCoverageReport(Coverage report, ExecutionContext context) {
 
 		CoverageReport coverageReport = new CoverageReport();
 		coverageReport.setName("Gobertura coverage");
@@ -103,7 +97,7 @@ public class GcovResultParser implements ICoverageCoverter {
 		coverageReport.setClassCovered(classesCovered);
 		coverageReport.setClassMissed(classesMissed);
 
-		coverageReport.setMarkup(GcovHTMLMarkupBuilder.genearteSummary(coverageReport));
+		coverageReport.setMarkup(GcovHTMLMarkupBuilder.genearteSummary(coverageReport, context));
 
 		coverageReport.setType(CoverageType.COBERTURA);
 

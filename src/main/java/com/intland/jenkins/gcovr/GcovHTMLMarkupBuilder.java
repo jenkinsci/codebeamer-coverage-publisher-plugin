@@ -1,12 +1,19 @@
 package com.intland.jenkins.gcovr;
 
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-
+import com.intland.jenkins.coverage.ExecutionContext;
 import com.intland.jenkins.coverage.model.CoverageBase;
 import com.intland.jenkins.coverage.model.CoverageReport;
 import com.intland.jenkins.coverage.model.DirectoryCoverage;
+import hudson.model.Build;
+import hudson.model.Item;
+import hudson.model.Job;
+import hudson.model.TopLevelItem;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * HTML markup builder for a jacoco coverage result
@@ -33,10 +40,10 @@ public class GcovHTMLMarkupBuilder {
 	}
 
 	private static String help = "<br><div class=\"information\">"
-			+ "<p><b>Packages:</b>A package is considered as executed when at least one class has been executed.</p>"
-			+ "<p><b>Classes:</b>A class is considered as executed when at least one of its lines has been executed. </p>"
-			+ "<p><b>Lines:</b>A source line is considered executed when at least one instruction that is assigned to this line has been executed.</p>"
-			+ "<p><b>Conditionals:</b>This metric counts the total number of such branches in a method and determines the number of executed or missed branches</p>"
+			+ "<p><b>Packages:</b> A package is considered as executed when at least one class has been executed.</p>"
+			+ "<p><b>Classes:</b> A class is considered as executed when at least one of its lines has been executed. </p>"
+			+ "<p><b>Lines:</b> A source line is considered executed when at least one instruction that is assigned to this line has been executed.</p>"
+			+ "<p><b>Conditionals:</b> This metric counts the total number of such branches in a method and determines the number of executed or missed branches</p>"
 			+ "</div>";
 
 	/**
@@ -101,13 +108,13 @@ public class GcovHTMLMarkupBuilder {
 
 		builder.append("</tbody></table>");
 
-		builder.append(help);
-
 		return builder.toString();
 	}
 
-	public static String genearteSummary(CoverageReport report) {
+	public static String genearteSummary(CoverageReport report, ExecutionContext context) {
 		StringBuilder builder = new StringBuilder();
+
+		builder.append(help);
 
 		builder.append("<h2><b>Overall Coverage Summary</b></h2>");
 		builder.append(createHeader(true, true));
@@ -118,8 +125,6 @@ public class GcovHTMLMarkupBuilder {
 		appendPackageColumn(builder, report);
 		appendColumns(builder, report, true);
 		builder.append("</tr></tbody></table>");
-
-		builder.append(help);
 
 		builder.append("<br><h2><b>Coverage Breakdown by Package</b></h2>");
 
@@ -138,6 +143,9 @@ public class GcovHTMLMarkupBuilder {
 			}
 			builder.append("</tbody></table>");
 		}
+
+        String url = context.getBuildResultUrl();
+		builder.append(String.format("To access Jenkins click here: <a href=%s>Jenkins Build Result</a>", url));
 
 		return builder.toString();
 	}
@@ -178,8 +186,6 @@ public class GcovHTMLMarkupBuilder {
 		builder.append("</tr>");
 
 		builder.append("</tbody></table>");
-
-		builder.append(help);
 
 		builder.append("<br><h2><b>Coverage Breakdown by Class</b></h2>");
 
