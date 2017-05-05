@@ -144,8 +144,11 @@ public class GcovHTMLMarkupBuilder {
 			builder.append("</tbody></table>");
 		}
 
-        String url = context.getBuildResultUrl();
-		builder.append(String.format("To access Jenkins click here: <a href=%s>Jenkins Build Result</a>", url));
+		// there is no context while logging
+		if (context != null) {
+            String url = context.getBuildResultUrl();
+            builder.append(String.format("To access Jenkins click here: <a href=%s>Jenkins Build Result</a>", url));
+        }
 
 		return builder.toString();
 	}
