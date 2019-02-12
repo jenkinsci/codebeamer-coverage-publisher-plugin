@@ -1,5 +1,10 @@
 package com.intland.jenkins.coverage;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.intland.jenkins.api.CodebeamerApiClient;
 import com.intland.jenkins.api.dto.TrackerDto;
 import com.intland.jenkins.api.dto.TrackerItemDto;
@@ -8,22 +13,29 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Item;
+import hudson.model.Queue;
+import hudson.model.queue.Tasks;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 public class CodeBeamerCoveragePublisher extends Publisher {
 
 	private String uri;
-	private String username;
-	private String password;
+	private String credentialsId;
 	private Integer testSetTrackerId;
 	private Integer testCaseTrackerId;
 	private Integer testRunTrackerId;
@@ -46,11 +58,10 @@ public class CodeBeamerCoveragePublisher extends Publisher {
 	@DataBoundConstructor
 	public CodeBeamerCoveragePublisher() {
 		this.uri = StringUtils.EMPTY;
-		this.username = StringUtils.EMPTY;
-		this.password = StringUtils.EMPTY;
 		this.testSetTrackerId = null;
 		this.testCaseTrackerId = null;
 		this.testCaseParentId = null;
+		this.credentialsId = null;
 		this.testRunTrackerId = null;
 		this.testConfigurationId = null;
 		this.includedPackages = StringUtils.EMPTY;
@@ -77,8 +88,12 @@ public class CodeBeamerCoveragePublisher extends Publisher {
 
 		// construct configuration
 		context.setUri(this.uri);
-		context.setUsername(this.username);
-		context.setPassword(this.password);
+
+		StandardUsernamePasswordCredentials credentials = getCredentials(build.getParent(), credentialsId);
+		String username = getUsername(credentials);
+		String password = getPassword(credentials);
+		context.setUsername(username);
+		context.setPassword(password);
 		context.setJacocReportPath(this.jacocoReportPath);
 		context.setCoberturaReportPath(this.coberturaReportPath);
 		context.setTestCaseParentId(this.testCaseParentId);
@@ -102,6 +117,26 @@ public class CodeBeamerCoveragePublisher extends Publisher {
 		return true;
 	}
 
+	public static StandardUsernamePasswordCredentials getCredentials(Item job, String credentialsId) {
+		StandardUsernamePasswordCredentials credentials = CredentialsMatchers.firstOrNull(
+				CredentialsProvider.lookupCredentials(
+						StandardUsernamePasswordCredentials.class,
+						job,
+						ACL.SYSTEM,
+						Collections.<DomainRequirement>emptyList()),
+				CredentialsMatchers.withId(credentialsId)
+		);
+		return credentials;
+	}
+
+	private String getUsername(StandardUsernamePasswordCredentials standardUsernamePasswordCredentials) {
+		return standardUsernamePasswordCredentials.getUsername();
+	}
+
+	private String getPassword(StandardUsernamePasswordCredentials standardUsernamePasswordCredentials) {
+		return standardUsernamePasswordCredentials.getPassword().getPlainText();
+	}
+
 	public String getUri() {
 		return this.uri;
 	}
@@ -111,22 +146,13 @@ public class CodeBeamerCoveragePublisher extends Publisher {
 		this.uri = uri;
 	}
 
-	public String getUsername() {
-		return this.username;
+	public String getCredentialsId() {
+		return credentialsId;
 	}
 
 	@DataBoundSetter
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return this.password;
-	}
-
-	@DataBoundSetter
-	public void setPassword(String password) {
-		this.password = password;
+	public void setCredentialsId(String credentialsId) {
+		this.credentialsId = credentialsId;
 	}
 
 	public Integer getTestSetTrackerId() {
@@ -302,6 +328,28 @@ public class CodeBeamerCoveragePublisher extends Publisher {
 			}
 
 			return result;
+		}
+
+		public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project, @QueryParameter String credentialsId) {
+			StandardListBoxModel result = new StandardListBoxModel();
+			if (project == null) {
+				if (!Jenkins.getActiveInstance().hasPermission(Jenkins.ADMINISTER)) {
+					return result.includeCurrentValue(credentialsId);
+				}
+			} else {
+				if (!project.hasPermission(Item.EXTENDED_READ) && !project.hasPermission(CredentialsProvider.USE_ITEM)) {
+					return result.includeCurrentValue(credentialsId);
+				}
+			}
+			return result
+					.includeEmptyValue()
+					.includeMatchingAs(
+							project instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) project) : ACL.SYSTEM,
+							project,
+							StandardUsernamePasswordCredentials.class,
+							Collections.<DomainRequirement>emptyList(),
+							CredentialsMatchers.always())
+					.includeCurrentValue(credentialsId);
 		}
 	}
 

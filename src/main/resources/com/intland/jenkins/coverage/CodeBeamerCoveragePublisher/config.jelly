@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     
     <f:entry title="Jacoco Report File Path" field="jacocoReportPath" help="/plugin/codebeamer-coverage-importer/help/help-jacocoReportPath.html">
       <f:textbox />
@@ -12,13 +12,9 @@
     <f:entry title="Url" field="uri" help="/plugin/codebeamer-coverage-importer/help/help-uri.html">
       <f:textbox />
     </f:entry>
-    
-    <f:entry title="Username" field="username" help="/plugin/codebeamer-coverage-importer/help/help-username.html">
-      <f:textbox />
-    </f:entry>
-    
-    <f:entry title="Password" field="password" help="/plugin/codebeamer-coverage-importer/help/help-password.html">
-      <f:password />
+
+    <f:entry field="credentialsId" title="${%Credentials}">
+      <c:select />
     </f:entry>
     
     <f:entry title="Test Configuration Item ID" field="testConfigurationId" help="/plugin/codebeamer-coverage-importer/help/help-testConfigurationId.html">
