@@ -283,7 +283,7 @@ public class ExecutionContext {
 	}
 
 	public String getBuildResultUrl() {
-		Jenkins jenkins = Jenkins.getInstance();
+		Jenkins jenkins = Jenkins.get();
 		String rootUrl = jenkins.getRootUrl();
 		String jobUrl = build.getUrl();
 		return rootUrl + jobUrl;

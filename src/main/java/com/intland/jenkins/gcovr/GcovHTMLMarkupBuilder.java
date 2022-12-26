@@ -4,16 +4,9 @@ import com.intland.jenkins.coverage.ExecutionContext;
 import com.intland.jenkins.coverage.model.CoverageBase;
 import com.intland.jenkins.coverage.model.CoverageReport;
 import com.intland.jenkins.coverage.model.DirectoryCoverage;
-import hudson.model.Build;
-import hudson.model.Item;
-import hudson.model.Job;
-import hudson.model.TopLevelItem;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * HTML markup builder for a jacoco coverage result

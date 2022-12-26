@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intland.jenkins.api.dto.*;
 import com.intland.jenkins.coverage.ExecutionContext;
 import jcifs.util.Base64;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.http.Header;
@@ -27,6 +26,7 @@ import org.apache.http.message.BasicHeader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -55,7 +55,7 @@ public class CodebeamerApiClient {
 
 		// initialize rest client
         // http://stackoverflow.com/questions/9539141/httpclient-sends-out-two-requests-when-using-basic-auth
-		final String authHeader = "Basic " + Base64.encode((username + ":" + password).getBytes(Charsets.UTF_8));
+		final String authHeader = "Basic " + Base64.encode((username + ":" + password).getBytes(StandardCharsets.UTF_8));
 
 		HashSet<Header> defaultHeaders = new HashSet<Header>();
 		defaultHeaders.add(new BasicHeader(HttpHeaders.AUTHORIZATION, authHeader));

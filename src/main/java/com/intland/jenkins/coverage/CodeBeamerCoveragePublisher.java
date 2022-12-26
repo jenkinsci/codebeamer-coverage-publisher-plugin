@@ -333,7 +333,7 @@ public class CodeBeamerCoveragePublisher extends Publisher {
 		public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project, @QueryParameter String credentialsId) {
 			StandardListBoxModel result = new StandardListBoxModel();
 			if (project == null) {
-				if (!Jenkins.getActiveInstance().hasPermission(Jenkins.ADMINISTER)) {
+				if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
 					return result.includeCurrentValue(credentialsId);
 				}
 			} else {
