@@ -211,7 +211,7 @@ public class CodebeamerCoverageExecutor {
 	 */
 	private static void appendJenkinsUrl(CoverageBase coverageData, DirectoryCoverage parentCoverage,
 			ExecutionContext context) {
-		String jenkinsBase = Jenkins.getInstance().getRootUrl();
+		String jenkinsBase = Jenkins.get().getRootUrl();
 		if (StringUtils.isNotBlank(jenkinsBase)) {
 			StringBuilder builder = new StringBuilder();
 			builder.append("<br><br><a class=\"actionLink\" href=\"");
